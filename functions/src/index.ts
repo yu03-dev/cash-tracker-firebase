@@ -1,19 +1,20 @@
-/**
- * Import function triggers from their respective submodules:
- *
- * import {onCall} from "firebase-functions/v2/https";
- * import {onDocumentWritten} from "firebase-functions/v2/firestore";
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
- */
+import { onRequest } from "firebase-functions/v2/https";
+import * as express from "express";
+import * as cors from "cors";
 
-import {onRequest} from "firebase-functions/v2/https";
-import * as logger from "firebase-functions/logger";
+import RecordRouter from "./routes/records";
+import { authChecker } from "./middleware/authChecker";
 
-// Start writing functions
-// https://firebase.google.com/docs/functions/typescript
+const corsOptions = {
+  origin: "http://localhost:3000",
+};
 
-// export const helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+const app = express();
+
+// middleware
+app.use(cors(corsOptions));
+app.use(authChecker);
+
+app.use("/", RecordRouter);
+
+export const api = onRequest(app);
